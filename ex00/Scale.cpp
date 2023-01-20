@@ -13,24 +13,15 @@ Scale::Scale( void ): _val("\0"), _cval('\0'), _cerr("Non displayable"), _ival(0
     std::cout << "Default constructor called -> 0 is set as default" << std::endl;
 }
 
-Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"), _ival(0), _ierr("\0"), _fval(0.0), _ferr("\0"), _dval(0.0), _derr("\0"){
+Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("Non displayable"), _ival(0), _ierr("\0"), _fval(0.0), _ferr("\0"), _dval(0.0), _derr("\0"){
 
     char    *end;
-//reste cas nan, +inf, -inf
-//gerer le cas ou arguments non valide -> exception ?
-//tester des trucs chelou ->overflow d'un int casse tout
-//                        ->underflow    casse tout
-//                        ->overflow d'un float ca marche 3.40282e+38 si interpreter comme un double
-//                        ->undeflow d'un float pas oublier le f
-//                        ->overflow d'un double ->ne set pas les autres erreurs a impossible
-//                        ->underflow d'un double ->ne set pas les autre a impossible
-//DISPLAY DOIT ETRE DIFFERENT ->PLUS PROPRE, utilisation de roundf ? ou ca tronc ?
+//reste cas nan, +inf, -inf, +inff, -inff;
+//gerer . puis point 
 //virer les setter qui servent pas a grand chose ??
 
     if ((this->getValue()).length() == 1 && !(std::isdigit(this->getValue()[0])))
     {
-        //ici c'est un char.
-        // std::cout << "cas ou type est un char" << std::endl;
         this->setCharValue(this->getValue()[0]);
         this->setDoubleValue(this->charToDouble(this->getCharValue()));
         this->doubleToInt(this->getDoubleValue());
@@ -41,7 +32,6 @@ Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"),
         long l_num = std::strtol(value.c_str(), &end, 10);
         switch (*end) {
             case '\0' :
-            //ici c'est un int
                 std::cout << "cas ou type est un int" << std::endl;
                 if (l_num > std::numeric_limits<int>::max() || l_num < std::numeric_limits<int>::min())
                 {
@@ -49,44 +39,53 @@ Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"),
                     this->setIntErr("impossible");
                     this->setFloatErr("impossible");
                     this->setDoubleErr("impossible");
-
+                    this->setCharErr("impossible");
                 }
                 else
+                {
                     this->setIntValue(static_cast<int>(l_num));
-                this->setDoubleValue(this->intToDouble(this->getIntValue()));
-                this->doubleToChar(this->getDoubleValue());
-                this->doubleToFloat(this->getDoubleValue());
+                    this->setDoubleValue(this->intToDouble(this->getIntValue()));
+                    this->doubleToChar(this->getDoubleValue());
+                    this->doubleToFloat(this->getDoubleValue());
+                }
                 break;
             case '.' :
                 {
                     long double ld_num = std::strtold(value.c_str(), &end);
                     if (*end == '\0')
                     {
-                        //ici c'est un double
-                        // std::cout << "cas ou type est un double" << std::endl;
                         if (ld_num > std::numeric_limits<double>::max() || ld_num < ( (-1) *std::numeric_limits<double>::max()))
-                            this->_derr = "impossible";
+                        {
+                            this->setIntErr("impossible");
+                            this->setFloatErr("impossible");
+                            this->setDoubleErr("impossible");
+                            this->setCharErr("impossible");
+                        }
                         else
+                        {
                             this->setDoubleValue(static_cast<double>(ld_num));
-                        this->doubleToChar(this->getDoubleValue());
-                        this->doubleToFloat(this->getDoubleValue());
-                        this->doubleToInt(this->getDoubleValue());
+                            this->doubleToChar(this->getDoubleValue());
+                            this->doubleToFloat(this->getDoubleValue());
+                            this->doubleToInt(this->getDoubleValue());
+                        }
                     }
                     else if (*end == 'f' && *(end + 1) == '\0')
                     {
-                        //ici c'est un float 
-                        // std::cout << "cas ou type est un float" << std::endl;
                         if (ld_num > std::numeric_limits<float>::max() || ld_num < ( (-1) * std::numeric_limits<float>::max()))
-                            this->_ferr = "impossible";
+                        {
+                            this->setIntErr("impossible");
+                            this->setFloatErr("impossible");
+                            this->setDoubleErr("impossible");
+                            this->setCharErr("impossible");
+                        }   
                         else
-                            this->_fval = static_cast<float>(ld_num);
+                            this->setFloatValue(static_cast<float>(ld_num));
                         this->setDoubleValue(this->floatToDouble(this->getFloatValue()));
                         this->doubleToChar(this->getDoubleValue());
                         this->doubleToInt(this->getDoubleValue());
                     }
                     else
                         std::cout << "parametre d'entree : " << value << " non valide"<< std::endl;
-                    //ici c'est une erreur de parametre d'entre type : 123214.toto
                     break;
                 }
             default :
@@ -94,7 +93,6 @@ Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"),
                 break;                                                                                                                                                          
         }
     }
-    // std::cout << "Value constructor called with value :"<< this->getValue() << std::endl;
 }
 
 Scale::Scale( Scale const & ref ): _val(ref.getValue()), _cval(ref.getCharValue()), _cerr(ref.getCharErr()), _ival(ref.getIntValue()), _ierr(ref.getIntErr()), _fval(ref.getFloatValue()), _ferr(ref.getFloatErr()), _dval(ref.getDoubleValue()), _derr(ref.getDoubleErr()) {
@@ -264,9 +262,8 @@ std::ostream   &operator<<(std::ostream & o, Scale const & ref) {
     else
         o << "float: " << ref.getFloatErr() << std::endl;
     if ((ref.getDoubleErr()).empty())
-        o << "double: "  << ref.getDoubleValue() << std::endl;
+        o << "double: "  << std::setprecision(1) << std::fixed << ref.getDoubleValue() << std::endl;
     else
         o << "double: " << ref.getDoubleErr() << std::endl;
     return (o);
 }
-// << std::setw(4) << std::setfill('0')
