@@ -44,7 +44,13 @@ Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"),
             //ici c'est un int
                 std::cout << "cas ou type est un int" << std::endl;
                 if (l_num > std::numeric_limits<int>::max() || l_num < std::numeric_limits<int>::min())
+                {
+
                     this->setIntErr("impossible");
+                    this->setFloatErr("impossible");
+                    this->setDoubleErr("impossible");
+
+                }
                 else
                     this->setIntValue(static_cast<int>(l_num));
                 this->setDoubleValue(this->intToDouble(this->getIntValue()));
@@ -214,6 +220,7 @@ int         Scale::doubleToInt( double dval ) {
         this->setIntErr("impossible");
     //ATTENTION IMPOSSIBLE AUSSI DANS LES CAS INF ET NAN
     int ival = static_cast<int>(dval);
+
     this->setIntValue(ival);
     return (this->getIntValue());
 }
@@ -253,7 +260,7 @@ std::ostream   &operator<<(std::ostream & o, Scale const & ref) {
     else
         o << "int: " << ref.getIntErr() << std::endl;
     if ((ref.getFloatErr()).empty())
-        o << "float: " << ref.getFloatValue() << "f" << std::endl;
+        o << "float: " << std::setprecision(1) << std::fixed << ref.getFloatValue() << "f" << std::endl;
     else
         o << "float: " << ref.getFloatErr() << std::endl;
     if ((ref.getDoubleErr()).empty())

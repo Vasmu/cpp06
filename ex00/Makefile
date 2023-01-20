@@ -1,21 +1,21 @@
 SRCS= main.cpp \
 	  Scale.cpp \
 
-CC= c++
+CXX= c++
 
 CFLAGS= -Wall -Wextra -Werror -std=c++98
 
-OBJS= ${SRCS:.c=.o}
+OBJS= ${SRCS:.cpp=.o}
 
 NAME= convert
 
-%.o: %.c
-	${CC} -c $< -o ${<:.c=.o}
+%.o: %.cpp
+	${CXX} ${CFLAGS} -c $< -o ${<:.cpp=.o}
 
 all: ${NAME}
 
 ${NAME}: ${OBJS}
-	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+	${CXX} ${CFLAGS} ${OBJS} -o ${NAME}
 
 clean:
 	rm -f *.o
