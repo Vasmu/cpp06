@@ -11,9 +11,16 @@ int main( int ac, char **av)
     std::cout << "Wrong number of arguments" << std::endl;
     return (1);
   }
-  std::string value = av[1];
-  Scale scale(value);
-  std::cout << scale;
+  try
+  {
+    std::string value = av[1];
+    Scale scale(value);
+    std::cout << scale;
+  }
+  catch (Scale::NonValidArgument & e)
+  {
+    std::cout << e.what() << std::endl;
+  }
   // // char array[] = 
   // // Character end pointer
   // char* pend;

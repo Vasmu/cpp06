@@ -53,7 +53,6 @@ public :
  
 
     // ***** Conversion ***** 
-
     double      charToDouble( char cval);
     double      intToDouble( int ival );
     double      floatToDouble( float ival );
@@ -61,6 +60,12 @@ public :
     int         doubleToInt( double dval );
     float       doubleToFloat( double dval );
 
+    // ***** Exception *****
+    class NonValidArgument : public std::exception
+    {
+        public :
+            virtual const char *what( void ) const throw();
+    };
     Scale   &operator=(Scale const & ref);
 };
 

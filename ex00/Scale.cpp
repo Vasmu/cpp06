@@ -13,26 +13,48 @@ Scale::Scale( void ): _val("\0"), _cval('\0'), _cerr("Non displayable"), _ival(0
     std::cout << "Default constructor called -> 0 is set as default" << std::endl;
 }
 
-Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("Non displayable"), _ival(0), _ierr("\0"), _fval(0.0), _ferr("\0"), _dval(0.0), _derr("\0"){
+Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"), _ival(0), _ierr("\0"), _fval(0.0), _ferr("\0"), _dval(0.0), _derr("\0"){
 
     char    *end;
-//reste cas nan, +inf, -inf, +inff, -inff;
-//gerer . puis point 
-//virer les setter qui servent pas a grand chose ??
-
-    if ((this->getValue()).length() == 1 && !(std::isdigit(this->getValue()[0])))
+//  reste cas nan, +inf, -inf, +inff, -inff;
+//  reste cas "" et .
+//  gerer . puis point 
+//  virer les setter qui servent pas a grand chose ??
+    if ((this->getValue()).length() == 0)
+        throw Scale::NonValidArgument();
+    else if ((this->getValue()).length() == 1 && !(std::isdigit(this->getValue()[0])))
     {
         this->setCharValue(this->getValue()[0]);
         this->setDoubleValue(this->charToDouble(this->getCharValue()));
         this->doubleToInt(this->getDoubleValue());
         this->doubleToFloat(this->getDoubleValue());
     }
+    else if ( value == "nan" || value == "nanf" )
+    {
+        this->setCharErr("impossible");
+        this->setIntErr("impossible");
+        this->setFloatErr("nanf");
+        this->setDoubleErr("nan");
+    }
+    else if ( value == "+inf" || value == "+inff" )
+    {
+        this->setCharErr("impossible");
+        this->setIntErr("impossible");
+        this->setFloatErr("+inff");
+        this->setDoubleErr("+inf");
+    }
+    else if ( value == "-inf" || value == "-inff" )
+    {
+        this->setCharErr("impossible");
+        this->setIntErr("impossible");
+        this->setFloatErr("-inff");
+        this->setDoubleErr("-inf");
+    }
     else 
     {
         long l_num = std::strtol(value.c_str(), &end, 10);
         switch (*end) {
             case '\0' :
-                std::cout << "cas ou type est un int" << std::endl;
                 if (l_num > std::numeric_limits<int>::max() || l_num < std::numeric_limits<int>::min())
                 {
 
@@ -79,18 +101,22 @@ Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("Non d
                             this->setCharErr("impossible");
                         }   
                         else
+                        {
                             this->setFloatValue(static_cast<float>(ld_num));
-                        this->setDoubleValue(this->floatToDouble(this->getFloatValue()));
-                        this->doubleToChar(this->getDoubleValue());
-                        this->doubleToInt(this->getDoubleValue());
+                            this->setDoubleValue(this->floatToDouble(this->getFloatValue()));
+                            this->doubleToChar(this->getDoubleValue());
+                            this->doubleToInt(this->getDoubleValue());
+                        }    
                     }
                     else
-                        std::cout << "parametre d'entree : " << value << " non valide"<< std::endl;
+                        throw Scale::NonValidArgument();
                     break;
                 }
             default :
-                std::cout << "parametre d'entree : " << value << " non valide" << std::endl;
+            {
+                throw Scale::NonValidArgument();
                 break;                                                                                                                                                          
+            }
         }
     }
 }
@@ -266,4 +292,10 @@ std::ostream   &operator<<(std::ostream & o, Scale const & ref) {
     else
         o << "double: " << ref.getDoubleErr() << std::endl;
     return (o);
+}
+
+/***********                 EXCEPTION                 ************/
+
+const char *Scale::NonValidArgument::what( void ) const throw() {
+    return ("Argument is invalid ! Please type a int, char, double or float literal");
 }
