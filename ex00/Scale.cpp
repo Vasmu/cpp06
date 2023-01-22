@@ -16,10 +16,6 @@ Scale::Scale( void ): _val("\0"), _cval('\0'), _cerr("Non displayable"), _ival(0
 Scale::Scale( std::string const value ) : _val(value), _cval('\0'), _cerr("\0"), _ival(0), _ierr("\0"), _fval(0.0), _ferr("\0"), _dval(0.0), _derr("\0"){
 
     char    *end;
-//  reste cas nan, +inf, -inf, +inff, -inff;
-//  reste cas "" et .
-//  gerer . puis point 
-//  virer les setter qui servent pas a grand chose ??
     if ((this->getValue()).length() == 0)
         throw Scale::NonValidArgument();
     else if ((this->getValue()).length() == 1 && !(std::isdigit(this->getValue()[0])))
@@ -231,8 +227,8 @@ char        Scale::doubleToChar( double dval ) {
     char    c = static_cast<char>(dval);
     if (c >= 32 && c <= 126)
         this->setCharValue(static_cast<char>(dval));
-    else if ((this->getValue()).length() > 1)
-        this->setCharErr("impossible");
+    else if (c < 0 || c > 127 || c == '\0')
+         this->setCharErr("impossible");
     else
         this->setCharErr("Non displayable");
     this->setCharValue(c);
@@ -240,11 +236,9 @@ char        Scale::doubleToChar( double dval ) {
 }
 
 int         Scale::doubleToInt( double dval ) {
-    if (dval > std::numeric_limits<int>::max() || dval < std::numeric_limits<int>::min())
+    if (dval > std::numeric_limits<int>::max() || dval < -2147483648 /* std::numeric_limits<int>::min() */)
         this->setIntErr("impossible");
-    //ATTENTION IMPOSSIBLE AUSSI DANS LES CAS INF ET NAN
     int ival = static_cast<int>(dval);
-
     this->setIntValue(ival);
     return (this->getIntValue());
 }

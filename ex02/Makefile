@@ -1,4 +1,5 @@
 SRCS= main.cpp \
+	  Base.cpp \
 
 CXX= c++
 
@@ -6,7 +7,7 @@ CFLAGS= -Wall -Wextra -Werror -std=c++98
 
 OBJS= ${SRCS:.cpp=.o}
 
-NAME= serialize
+NAME= identify
 
 %.o: %.cpp
 	${CXX} ${CFLAGS} -c $< -o ${<:.cpp=.o}
